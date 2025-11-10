@@ -59,6 +59,9 @@ inputs:
   alternative-domain-private:
     description: ''
     required: false
+  tags:
+    description: 'Optional comma-separated list of S3 object tags (e.g., "Key1=Value1,Key2=Value2").'
+    required: false
 outputs:
   result:
     description: '`success` or `failure` is set.'
