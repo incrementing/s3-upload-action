@@ -30,6 +30,7 @@ if (NODE_ENV != 'local') {
     expire: core.getInput('expire'),
     alternativeDomainPublic: core.getInput('alternative-domain-public'),
     alternativeDomainPrivate: core.getInput('alternative-domain-private'),
+    tags: core.getInput('tags'),
   };
 } else {
   input = {
@@ -49,6 +50,7 @@ if (NODE_ENV != 'local') {
     expire: '180',
     alternativeDomainPublic: '',
     alternativeDomainPrivate: '',
+    tags: ''
   };
 }
 
@@ -105,6 +107,19 @@ async function run(input) {
     acl = 'private';
   }
 
+  // Parse comma-separated tags (e.g., "Key1=Value1,Key2=Value2")
+  let tagging;
+  if (input.tags) {
+    tagging = input.tags
+    .split(',')
+    .map(pair => pair.trim())
+    .filter(Boolean)
+    .map(pair => {
+      const [Key, Value] = pair.split('=');
+      return { Key: Key.trim(), Value: (Value || '').trim() };
+    });
+  }
+
   let params = {
     Bucket: input.awsBucket,
     Key: fileKey,
@@ -113,6 +128,11 @@ async function run(input) {
     Body: fs.readFileSync(input.filePath),
     ACL: acl,
   };
+
+  if (tagging) {
+    params.Tagging = tagging.map(t => `${t.Key}=${t.Value}`).join('&');
+  }
+  
   await s3.putObject(params).promise();
 
   let fileUrl;
