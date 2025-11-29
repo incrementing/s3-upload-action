@@ -1,5 +1,8 @@
 const core = require('@actions/core');
-const aws = require('aws-sdk');
+
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+const { GetObjectCommand, S3 } = require('@aws-sdk/client-s3');
+
 const fs = require('fs');
 const path = require('path');
 const qr = require('qrcode');
@@ -30,7 +33,9 @@ if (NODE_ENV != 'local') {
     expire: core.getInput('expire'),
     alternativeDomainPublic: core.getInput('alternative-domain-public'),
     alternativeDomainPrivate: core.getInput('alternative-domain-private'),
-    tags: core.getInput('tags'),
+		tags: core.getInput('tags'),
+		checksumAlgorithm: core.getInput('checksum-algorithm'),
+		checksum: core.getInput('checksum'),
   };
 } else {
   input = {
@@ -50,17 +55,19 @@ if (NODE_ENV != 'local') {
     expire: '180',
     alternativeDomainPublic: '',
     alternativeDomainPrivate: '',
-    tags: ''
+    tags: '',
+		checksumAlgorithm: '',
+		checksum: '',
   };
 }
 
-aws.config.update({
-  accessKeyId: input.awsAccessKeyId,
-  secretAccessKey: input.awsSecretAccessKey,
+const s3 = new S3({
+  credentials: {
+    accessKeyId: input.awsAccessKeyId,
+    secretAccessKey: input.awsSecretAccessKey,
+  },
   region: input.awsRegion,
 });
-
-const s3 = new aws.S3({signatureVersion: 'v4'});
 
 async function run(input) {
 
@@ -124,7 +131,7 @@ async function run(input) {
     Bucket: input.awsBucket,
     Key: fileKey,
     ContentType: input.contentType,
-    ContentDisposition: input.contentDisposition,
+    ContentDisposition: input.contentDisposition || "inline",
     Body: fs.readFileSync(input.filePath),
     ACL: acl,
   };
@@ -132,8 +139,43 @@ async function run(input) {
   if (tagging) {
     params.Tagging = tagging.map(t => `${t.Key}=${t.Value}`).join('&');
   }
-  
-  await s3.putObject(params).promise();
+
+	// Checksum handling
+	if (input.checksumAlgorithm !== '') {
+		if (!["CRC32","CRC32C","CRC64NVME","SHA1","SHA256"].includes(input.checksumAlgorithm)) {
+			throw new Error(`Unsupported checksum algorithm: ${input.checksumAlgorithm}`);
+		}
+		params.ChecksumAlgorithm = input.checksumAlgorithm;
+
+		// User-provided checksum value, send this instead of allowing the SDK to calculate it
+		if (input.checksum!=="") {
+			// AWS wants base64-encoded checksums, if the provided checksum is in hex, convert it
+			let checksumValue = input.checksum;
+			if (/^[0-9a-fA-F]+$/.test(checksumValue)) {
+				const buffer = Buffer.from(checksumValue, 'hex');
+				checksumValue = buffer.toString('base64');
+			}
+			switch (input.checksumAlgorithm) {
+				case "CRC32":
+					params.ChecksumCRC32 = checksumValue;
+					break;
+				case "CRC32C":
+					params.ChecksumCRC32C = checksumValue;
+					break;
+				case "CRC64NVME":
+					params.ChecksumCRC64NVME = checksumValue;
+					break;
+				case "SHA1":
+					params.ChecksumSHA1 = checksumValue;
+					break;
+				case "SHA256":
+					params.ChecksumSHA256 = checksumValue;
+					break;
+			}
+		}
+	}
+
+  await s3.putObject(params);
 
   let fileUrl;
   if (input.outputFileUrl == 'true' || input.outputQrUrl == 'true') {
@@ -148,7 +190,9 @@ async function run(input) {
         Key: fileKey,
         Expires: expire,
       };
-      fileUrl = await s3.getSignedUrlPromise('getObject', params);
+      fileUrl = await getSignedUrl(s3, new GetObjectCommand(params), {
+        expiresIn: '/* add value from \'Expires\' from v2 call if present, else remove */',
+      });
       if (input.alternativeDomainPrivate) {
         fileUrl = fileUrl.replace(`${input.awsBucket}.s3.${input.awsRegion}.amazonaws.com/${bucketRoot}`, `${input.alternativeDomainPrivate}/`);
       }
@@ -172,7 +216,7 @@ async function run(input) {
     Body: fs.readFileSync(tmpQrFile),
     ACL: 'public-read', // always public
   };
-  await s3.putObject(params).promise();
+  await s3.putObject(params);
   fs.unlinkSync(tmpQrFile);
 
   let qrUrl = `https://${input.awsBucket}.s3.${input.awsRegion}.amazonaws.com/${qrKey}`;

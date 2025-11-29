@@ -62,6 +62,13 @@ inputs:
   tags:
     description: 'Optional comma-separated list of S3 object tags (e.g., "Key1=Value1,Key2=Value2").'
     required: false
+  checksum-algorithm:
+    description: 'Checksum algorithm to use ("CRC32", "CRC32C", "CRC64NVME", "SHA1" or "SHA256").'
+    default: "CRC32"
+    required: false
+  checksum:
+    description: 'Expected checksum value of the file to verify integrity before upload.'
+    required: false
 outputs:
   result:
     description: '`success` or `failure` is set.'

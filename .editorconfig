@@ -1,0 +1,6 @@
+root = true
+
+# Follow original code style
+[src/**.js]
+indent_style = tab
+indent_size = 2

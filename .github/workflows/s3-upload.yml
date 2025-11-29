@@ -26,6 +26,9 @@ jobs:
           # qr-width:
           # public:
           # expire:
+          checksum-algorithm: SHA256
+          #checksum: "qHT22mtgIsMewhPNSaHZtfTD5dFavvozYLQuefCJq2U="
+          checksum: "a874f6da6b6022c31ec213cd49a1d9b5f4c3e5d15abefa3360b42e79f089ab65"
       - name: Show result
         if: always()
         run: |
