@@ -14,7 +14,7 @@
   },
   "homepage": "https://github.com/hkusu/s3-upload-action#readme",
   "scripts": {
-    "test": "rm -rf dist/ && esbuild src/main.js --bundle --platform=node --outfile=dist/index.js && act --use-gitignore=false",
+    "test": "rm -rf dist/ && esbuild src/main.js --bundle --platform=node --outfile=dist/index.js && act --job=upload --use-gitignore=false",
     "package": "rm -rf dist/ && esbuild src/main.js --bundle --platform=node --outfile=dist/index.js --minify"
   },
   "dependencies": {

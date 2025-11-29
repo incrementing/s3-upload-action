@@ -7,7 +7,6 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    if: ${{ vars.GITHUB_ACTIONS == 'true' }}
     steps:
       - uses: actions/checkout@v5
 
