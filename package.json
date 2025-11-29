@@ -15,14 +15,15 @@
   "homepage": "https://github.com/hkusu/s3-upload-action#readme",
   "scripts": {
     "local": "NODE_ENV=local node src/main.js",
-    "package": "ncc build src/main.js -o dist --source-map --license licenses.txt"
+    "package": "rm -rf dist/ && esbuild src/main.js --bundle --platform=node --outfile=dist/index.js --minify"
   },
   "dependencies": {
     "@actions/core": "^1.11.1",
-    "aws-sdk": "^2.1692.0",
+    "@aws-sdk/client-s3": "^3.940.0",
+    "@aws-sdk/s3-request-presigner": "^3.940.0",
     "qrcode": "^1.5.4"
   },
   "devDependencies": {
-    "@vercel/ncc": "^0.38.4"
+    "esbuild": "^0.27.0"
   }
 }
