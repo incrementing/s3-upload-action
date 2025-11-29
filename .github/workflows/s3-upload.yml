@@ -6,6 +6,7 @@ jobs:
   upload:
     name: Use this action for check
     runs-on: ubuntu-latest
+    if: ${{ github.actions != true }}
     steps:
       - name: Check out
         uses: actions/checkout@v3
