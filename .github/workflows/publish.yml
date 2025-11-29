@@ -1,0 +1,19 @@
+name: 'Publish GitHub Action'
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install dependencies
+        run: npm i
+
+      - uses: joshjohanning/publish-github-action@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          create_release_as_draft: true
