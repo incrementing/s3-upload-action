@@ -185,13 +185,11 @@ async function run(input) {
         fileUrl = fileUrl.replace(`${input.awsBucket}.s3.${input.awsRegion}.amazonaws.com/${bucketRoot}`, `${input.alternativeDomainPublic}/`);
       }
     } else {
-      params = {
-        Bucket: input.awsBucket,
-        Key: fileKey,
-        Expires: expire,
-      };
-      fileUrl = await getSignedUrl(s3, new GetObjectCommand(params), {
-        expiresIn: '/* add value from \'Expires\' from v2 call if present, else remove */',
+      fileUrl = await getSignedUrl(s3, new GetObjectCommand({
+				Bucket: input.awsBucket,
+				Key: fileKey,
+			}), {
+				expiresIn: expire,
       });
       if (input.alternativeDomainPrivate) {
         fileUrl = fileUrl.replace(`${input.awsBucket}.s3.${input.awsRegion}.amazonaws.com/${bucketRoot}`, `${input.alternativeDomainPrivate}/`);
@@ -209,14 +207,13 @@ async function run(input) {
 
   await qr.toFile(tmpQrFile, fileUrl, { width: qrWidth })
 
-  params = {
-    Bucket: input.awsBucket,
-    Key: qrKey,
-    ContentType: 'image/png', // Required to display as an image in the browser
-    Body: fs.readFileSync(tmpQrFile),
-    ACL: 'public-read', // always public
-  };
-  await s3.putObject(params);
+  await s3.putObject({
+		Bucket: input.awsBucket,
+		Key: qrKey,
+		ContentType: 'image/png', // Required to display as an image in the browser
+		Body: fs.readFileSync(tmpQrFile),
+		ACL: 'public-read', // always public
+	});
   fs.unlinkSync(tmpQrFile);
 
   let qrUrl = `https://${input.awsBucket}.s3.${input.awsRegion}.amazonaws.com/${qrKey}`;
