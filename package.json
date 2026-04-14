@@ -1,6 +1,6 @@
 {
   "name": "s3-upload-action",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "This is a GitHub Action that uploads a file to Amazon S3",
   "main": "src/main.js",
   "author": "Hiroyuki Kusu <kusu0806@gmail.com>",
@@ -20,6 +20,7 @@
   "dependencies": {
     "@actions/core": "^1.11.1",
     "@aws-sdk/client-s3": "^3.940.0",
+    "@aws-sdk/crc64-nvme-crt": "^3.1030.0",
     "@aws-sdk/s3-request-presigner": "^3.940.0",
     "qrcode": "^1.5.4"
   },
