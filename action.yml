@@ -1,63 +1,66 @@
-name: 'S3 Upload Action'
-description: 'This is a GitHub Action that uploads a file to Amazon S3.'
-author: 'Hiroyuki Kusu'
+name: "S3 Upload Action"
+description: "This is a GitHub Action that uploads a file to Amazon S3."
+author: "Hiroyuki Kusu"
 branding:
-  icon: 'upload-cloud'
-  color: 'white'
+  icon: "upload-cloud"
+  color: "white"
 inputs:
   aws-access-key-id:
-    description: ''
+    description: ""
     required: true
   aws-secret-access-key:
-    description: ''
+    description: ""
     required: true
   aws-region:
-    description: ''
+    description: ""
     required: true
+  aws-endpoint-url:
+    description: "Optional custom endpoint URL for S3-compatible storage services."
+    required: false
   aws-bucket:
-    description: ''
+    description: ""
     required: true
   file-path:
-    description: ''
+    description: ""
     required: true
   destination-dir:
-    description: ''
+    description: ""
     required: false
   bucket-root:
-    description: ''
-    default: ''
+    description: ""
+    default: ""
     required: false
   output-file-url:
-    description: ''
-    default: 'false'
+    description: ""
+    default: "false"
     required: false
   content-type:
-    description: ''
+    description: ""
     required: false
   content-disposition:
-    description: ''
+    description: ""
     required: false
   output-qr-url:
-    description: ''
-    default: 'false'
+    description: ""
+    default: "false"
     required: false
   qr-width:
-    description: ''
-    default: '120'
+    description: ""
+    default: "120"
     required: false
   public:
-    description: ''
-    default: 'false'
+    description: ""
+    default: "false"
     required: false
   expire:
-    description: ''
-    default: '604800'
+    description: ""
+    default: "604800"
     required: false
   alternative-domain-public:
-    description: ''
+    description: ""
     required: false
   alternative-domain-private:
-    description: ''
+    description: ""
     required: false
   tags:
     description: 'Optional comma-separated list of S3 object tags (e.g., "Key1=Value1,Key2=Value2").'
@@ -67,15 +70,15 @@ inputs:
     default: "CRC32"
     required: false
   checksum:
-    description: 'Expected checksum value of the file to verify integrity before upload.'
+    description: "Expected checksum value of the file to verify integrity before upload."
     required: false
 outputs:
   result:
-    description: '`success` or `failure` is set.'
+    description: "`success` or `failure` is set."
   file-url:
-    description: ''
+    description: ""
   qr-url:
-    description: ''
+    description: ""
 runs:
-  using: 'node24'
-  main: 'dist/index.js'
+  using: "node24"
+  main: "dist/index.js"
